@@ -1,0 +1,49 @@
+{
+  "name": "v0.001",
+  "tree": {
+    "$className": "DataModel",
+
+    "ReplicatedStorage": {
+      "Common": {
+        "$path": "src/ReplicatedStorage"
+      }
+    },
+
+    "ServerScriptService": {
+      "Server": {
+        "$path": "src/ServerScriptService"
+      }
+    },
+
+    "StarterPlayer": {
+      "StarterPlayerScripts": {
+        "Client": {
+          "$path": "src/StarterPlayer/StarterPlayerScripts"
+        }
+      },
+      "StarterCharacterScripts": {
+        "Client": {
+          "$path": "src/StarterPlayer/StarterCharacterScripts"
+        }
+      }
+    },
+
+    "StarterGui": {
+      "Controller": {
+        "$path": "src/StarterGui"
+      }
+    },
+
+    "Workspace": {
+      "$properties": {
+        "FilteringEnabled": true
+      }
+    },
+
+    "SoundService": {
+      "$properties": {
+        "RespectFilteringEnabled": true
+      }
+    }
+  }
+}
