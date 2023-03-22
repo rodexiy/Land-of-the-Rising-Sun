@@ -14,6 +14,10 @@ local TweenService = game:GetService("TweenService")
 local UIS = game:GetService("UserInputService")
 local CAS = game:GetService("ContextActionService")
 
+local PlayerGui = player.PlayerGui
+local Controller = PlayerGui:WaitForChild("Controller")
+local UIManager = require(Controller:WaitForChild("UIManager"))
+
 local camera = workspace.CurrentCamera :: Camera
 --local Trigger = game.ReplicatedStorage.Public.Trigger :: RemoteEvent
 
@@ -23,6 +27,7 @@ local oldWalkspeed = 12
 local locked = false
 local enemyLocked = nil
 
+local canChangeStance = true
 
 local Animations = {
     Roll = Animator:LoadAnimation(Animate.RollAnimation.roll)
@@ -70,11 +75,27 @@ end
 
 local shoulderPosition = Vector3.new(3, 2, 7.5)
 local shoulderName = "Right"
+local currentStance = "Right"
+local oldStanceName = currentStance
 
 local mouse = player:GetMouse()
 local oldZoomDistance
 
+local stanceCameraPosition = {
+    ["Up"] = function()
+        shoulderPosition = Vector3.new(humanoid.CameraOffset.X + -(humanoid.CameraOffset.X / 2), 3.5, 5)
+    end,
 
+    ["Left"] = function()
+        shoulderPosition = Vector3.new(-3, 2, 7.5)
+    end,
+
+    ["Right"] = function()
+        shoulderPosition = Vector3.new(3, 2, 7.5)
+    end,
+}
+
+local fakeCoroutine = false
 local CAS_Actions = {
     ["LockOnEnemy"] = function(inputState, _inputObject)
         if inputState ~= Enum.UserInputState.Begin then return end
@@ -187,21 +208,45 @@ local CAS_Actions = {
     ["ChangeStance"] = function(inputState, _inputObject)
         local inputStates = {
             [Enum.UserInputState.Begin] = function()
+                if fakeCoroutine == true then return end
+
                 local screenSize = camera.ViewportSize
                 local screenCenter = (screenSize * 0.5)
 
-
-                RunService:BindToRenderStep("ChangeStanceBind", Enum.RenderPriority.Last.Value, function()
+                fakeCoroutine = true
+                while fakeCoroutine == true do
                     local mouseX, mouseY = mouse.X, mouse.Y
                     local mouseV2 = Vector2.new(mouseX, mouseY)
                     local vectorDiff = mouseV2 - screenCenter
 
                     local angle = math.deg(math.atan2(vectorDiff.X, -vectorDiff.Y))
-                    print(angle)        
-                end)
+
+                    if angle >= -60 and angle <= 60 then
+                        oldStanceName = currentStance
+                        currentStance = "Up"
+                    elseif angle < -60 and angle >= -180 then
+                        oldStanceName = currentStance
+                        currentStance = "Left"
+                    else
+                        oldStanceName = currentStance
+                        currentStance = "Right"
+                    end
+                    
+                    local changeStanceDelay = 0
+                    if oldStanceName ~= currentStance and canChangeStance then
+                        canChangeStance = false
+                        task.wait(changeStanceDelay)
+                        canChangeStance = true
+                        stanceCameraPosition[currentStance]()
+                        humanoid:SetAttribute("CurrentStance", currentStance)
+                        UIManager:UpdateStanceViewer()
+                    end
+                    task.wait()
+                end
+
             end,    
             [Enum.UserInputState.End] = function()
-                RunService:UnbindFromRenderStep("ChangeStanceBind")
+                fakeCoroutine = false
             end
         }
 

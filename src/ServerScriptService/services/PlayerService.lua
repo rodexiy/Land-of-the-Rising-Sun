@@ -11,15 +11,15 @@ end
 
 function PlayerService:AssemblyCharacter(player: Player)
     local playerData = DataManager:Get(player)
-    player:LoadCharacter()
 
-    local character = player.Character
+    player:LoadCharacter()
+    local character = player.Character or player.CharacterAdded:Wait()
     local humanoid = character:WaitForChild("Humanoid"):: Humanoid
 
     humanoid:SetAttribute("RollDebounce", false)
     humanoid:SetAttribute("Running", false)
     humanoid:SetAttribute("WeaponClass", playerData.WeaponClass)
-    humanoid:SetAttribute("CurrentShoulder", "Right")
+    humanoid:SetAttribute("CurrentStance", "Right")
 
     humanoid.WalkSpeed = 12
 
