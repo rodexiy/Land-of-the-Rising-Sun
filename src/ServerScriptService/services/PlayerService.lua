@@ -35,6 +35,10 @@ function PlayerService:CharacterDied(player: Player, character)
     PlayerService:AssemblyCharacter(player)
 end
 
+function PlayerService:Dash()
+    
+end
+
 
 function PlayerService:Main(services)
     DataManager = services.DataManager

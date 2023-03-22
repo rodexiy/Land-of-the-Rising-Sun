@@ -16,6 +16,13 @@ function CombatService:WeldSword(player)
     end
 end
 
+function CombatService:Attack(player)
+    local weaponClass = GetPlayerWeaponClass(player)
+    if WeaponClasses[weaponClass] then
+        WeaponClasses[weaponClass]:WeldSword(player)
+    end
+end
+
 function CombatService:Main(services)
     DataManager = services.DataManager
 

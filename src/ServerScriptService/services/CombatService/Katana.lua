@@ -22,6 +22,10 @@ function Katana:WeldSword(player)
     sword.Parent = characterAssets.Sword
 end
 
+function Katana:Attack()
+    
+end
+
 function Katana:Main(services)
     DataManager = services.DataManager
 end
