@@ -7,7 +7,7 @@ local Trigger = game.ReplicatedStorage.Public:WaitForChild("Trigger") :: RemoteE
 local DataConfiguration = require(game.ReplicatedStorage.Common:WaitForChild("DataConfiguration"))
 
 local ProfileStore = ProfileService.GetProfileStore(
-	"Land of the Rising Sun #1", --//DataKey
+	"Land of the Rising Sun #2", --//DataKey
 	DataConfiguration
 )
 
