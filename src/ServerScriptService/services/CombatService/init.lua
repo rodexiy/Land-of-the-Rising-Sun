@@ -23,6 +23,13 @@ function CombatService:Attack(player)
     end
 end
 
+function CombatService:ChangeStance(player, newStance)
+    local character = player.Character or player.CharacterAdded:Wait()
+    local humanoid = character:WaitForChild("Humanoid")
+
+    humanoid:SetAttribute("CurrentStance", newStance)
+end
+
 function CombatService:Main(services)
     DataManager = services.DataManager
 

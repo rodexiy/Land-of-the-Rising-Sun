@@ -19,7 +19,7 @@ local Controller = PlayerGui:WaitForChild("Controller")
 local UIManager = require(Controller:WaitForChild("UIManager"))
 
 local camera = workspace.CurrentCamera :: Camera
---local Trigger = game.ReplicatedStorage.Public.Trigger :: RemoteEvent
+local Trigger = game.ReplicatedStorage.Public.Trigger :: RemoteEvent
 
 local wTapped = false
 local oldWalkspeed = 12
@@ -239,6 +239,7 @@ local CAS_Actions = {
                         canChangeStance = true
                         stanceCameraPosition[currentStance]()
                         humanoid:SetAttribute("CurrentStance", currentStance)
+                        Trigger:FireServer("ChangeStance", humanoid:GetAttribute("CurrentStance"))
                         UIManager:UpdateStanceViewer()
                     end
                     task.wait()

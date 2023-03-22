@@ -1,5 +1,6 @@
 local Katana = {ModuleMain = true}
 local DataManager
+local Validate = require(game.ReplicatedStorage.Shared.Validate)
 
 function Katana:WeldSword(player)
     local playerData = DataManager:Get(player)
@@ -22,8 +23,12 @@ function Katana:WeldSword(player)
     sword.Parent = characterAssets.Sword
 end
 
-function Katana:Attack()
+function Katana:Attack(player: Player)
+    local character = player.Character or player.CharacterAdded:Wait()
+    local humanoid = character:WaitForChild("Humanoid")
     
+    if not Validate:CanAttack(humanoid) then return end
+
 end
 
 function Katana:Main(services)
