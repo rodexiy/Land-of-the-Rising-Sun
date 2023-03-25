@@ -20,6 +20,7 @@ function PlayerService:AssemblyCharacter(player: Player)
     humanoid:SetAttribute("Running", false)
     humanoid:SetAttribute("WeaponClass", playerData.WeaponClass)
     humanoid:SetAttribute("CurrentStance", "Right")
+    humanoid:SetAttribute("AttackVariationNumber", 1)
 
     humanoid.WalkSpeed = 12
 

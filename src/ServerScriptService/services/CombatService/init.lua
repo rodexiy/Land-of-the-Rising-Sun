@@ -1,4 +1,5 @@
 local CombatService = {ModuleMain = true}
+local Validate = require(game.ReplicatedStorage.Common.Validate)
 local DataManager
 
 local WeaponClasses = {}
@@ -19,13 +20,15 @@ end
 function CombatService:Attack(player)
     local weaponClass = GetPlayerWeaponClass(player)
     if WeaponClasses[weaponClass] then
-        WeaponClasses[weaponClass]:WeldSword(player)
+        WeaponClasses[weaponClass]:Attack(player)
     end
 end
 
 function CombatService:ChangeStance(player, newStance)
     local character = player.Character or player.CharacterAdded:Wait()
     local humanoid = character:WaitForChild("Humanoid")
+
+    if not Validate:CanChangeStance(humanoid) then return end
 
     humanoid:SetAttribute("CurrentStance", newStance)
 end

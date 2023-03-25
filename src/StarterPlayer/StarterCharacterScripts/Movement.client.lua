@@ -20,6 +20,7 @@ local UIManager = require(Controller:WaitForChild("UIManager"))
 
 local camera = workspace.CurrentCamera :: Camera
 local Trigger = game.ReplicatedStorage.Public.Trigger :: RemoteEvent
+local Validate = require(game.ReplicatedStorage.Common.Validate)
 
 local wTapped = false
 local oldWalkspeed = 12
@@ -83,7 +84,7 @@ local oldZoomDistance
 
 local stanceCameraPosition = {
     ["Up"] = function()
-        shoulderPosition = Vector3.new(humanoid.CameraOffset.X + -(humanoid.CameraOffset.X / 2), 3.5, 5)
+        shoulderPosition = Vector3.new(humanoid.CameraOffset.X + -(humanoid.CameraOffset.X / 2), 3.5, 7.5)
     end,
 
     ["Left"] = function()
@@ -203,18 +204,38 @@ local CAS_Actions = {
   
     end,
 
+    ["Attack"] = function(inputState, _inputObject)
+        if inputState ~= Enum.UserInputState.Begin then return end
 
+        Trigger:FireServer("Attack")
+    end,
 
     ["ChangeStance"] = function(inputState, _inputObject)
         local inputStates = {
             [Enum.UserInputState.Begin] = function()
                 if fakeCoroutine == true then return end
+                UIManager:ShowOrHideStanceViewer(true)
+
+                if not Validate:CanChangeStance(humanoid) then 
+                    repeat 
+                        task.wait()
+                        fakeCoroutine = false
+                    until Validate:CanChangeStance(humanoid) or not UIS:IsKeyDown(Enum.KeyCode.LeftAlt)
+                end
+
+                if not UIS:IsKeyDown(Enum.KeyCode.LeftAlt) then return end
 
                 local screenSize = camera.ViewportSize
-                local screenCenter = (screenSize * 0.5)
+                local screenCenter = Vector2.new(screenSize.X / 2, screenSize.Y / 1.6)
 
                 fakeCoroutine = true
                 while fakeCoroutine == true do
+                    if not Validate:CanChangeStance(humanoid) then 
+                        repeat 
+                            task.wait()
+                        until Validate:CanChangeStance(humanoid) or not UIS:IsKeyDown(Enum.KeyCode.LeftAlt)
+                    end
+    
                     local mouseX, mouseY = mouse.X, mouse.Y
                     local mouseV2 = Vector2.new(mouseX, mouseY)
                     local vectorDiff = mouseV2 - screenCenter
@@ -233,10 +254,8 @@ local CAS_Actions = {
                     end
                     
                     local changeStanceDelay = 0
-                    if oldStanceName ~= currentStance and canChangeStance then
-                        canChangeStance = false
-                        task.wait(changeStanceDelay)
-                        canChangeStance = true
+                    if oldStanceName ~= currentStance then
+
                         stanceCameraPosition[currentStance]()
                         humanoid:SetAttribute("CurrentStance", currentStance)
                         Trigger:FireServer("ChangeStance", humanoid:GetAttribute("CurrentStance"))
@@ -248,6 +267,7 @@ local CAS_Actions = {
             end,    
             [Enum.UserInputState.End] = function()
                 fakeCoroutine = false
+                UIManager:ShowOrHideStanceViewer(false)
             end
         }
 
@@ -255,6 +275,7 @@ local CAS_Actions = {
             inputStates[inputState]()
         end
     end,
+
 
 }
 
@@ -295,6 +316,7 @@ function CAS_Connector(actionName, inputState, _inputObject)
     end
 end
 
+CAS:BindAction("Attack", CAS_Connector, false, table.unpack({Enum.UserInputType.MouseButton1, Enum.UserInputType.Touch}))
 CAS:BindAction("ChangeStance", CAS_Connector, false, Enum.KeyCode.LeftAlt)
 CAS:BindAction("LockOnEnemy", CAS_Connector, false, Enum.KeyCode.L) 
 CAS:BindAction("Roll", CAS_Connector, false, Enum.KeyCode.Q) 

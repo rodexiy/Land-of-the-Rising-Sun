@@ -6,7 +6,11 @@ local CombatService = require(script.Parent.CombatService)
 local events = {
     ["ChangeStance"] = function(player, newStance)
         CombatService:ChangeStance(player, newStance)
-    end
+    end,
+
+    ["Attack"] = function(player)
+        CombatService:Attack(player)
+    end,
 }
 
 Trigger.OnServerEvent:Connect(function(player, action, data)

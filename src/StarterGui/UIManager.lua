@@ -41,5 +41,15 @@ function UIManager:UpdateStanceViewer()
     end
 end
 
+function UIManager:ShowOrHideStanceViewer(bool)
+    local stanceViewer = hud:WaitForChild("StanceViewer")
+
+    if bool then
+        stanceViewer.Enabled = true
+    else
+        stanceViewer.Enabled = false
+    end
+end
+
 
 return UIManager
