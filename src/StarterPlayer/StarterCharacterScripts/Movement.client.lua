@@ -63,14 +63,20 @@ function getClosestEnemy()
     local closestEnemy
 
     for i,enemy in ipairs(game.Workspace.Enemies:GetChildren()) do
-        local diff = (enemy.PrimaryPart.CFrame.Position - humanoidRootPart.CFrame.Position).Magnitude
-        
-        if diff <= dist then
-            dist = diff
-            closestEnemy = enemy
+        if enemy ~= character then
+            local diff = (enemy.PrimaryPart.CFrame.Position - humanoidRootPart.CFrame.Position).Magnitude
+            if diff < 50 then
+                if diff <= dist then
+                    dist = diff
+                    closestEnemy = enemy
+                end
+            end
         end
     end
 
+    if closestEnemy == nil then
+        return false
+    end
     return closestEnemy
 end
 
@@ -82,19 +88,6 @@ local oldStanceName = currentStance
 local mouse = player:GetMouse()
 local oldZoomDistance
 
-local stanceCameraPosition = {
-    ["Up"] = function()
-        shoulderPosition = Vector3.new(humanoid.CameraOffset.X + -(humanoid.CameraOffset.X / 2), 3.5, 7.5)
-    end,
-
-    ["Left"] = function()
-        shoulderPosition = Vector3.new(-3, 2, 7.5)
-    end,
-
-    ["Right"] = function()
-        shoulderPosition = Vector3.new(3, 2, 7.5)
-    end,
-}
 
 local fakeCoroutine = false
 local CAS_Actions = {
@@ -104,6 +97,10 @@ local CAS_Actions = {
         local lockStatus = {
             [false] = function()
                 local closestEnemy = getClosestEnemy()
+                if not closestEnemy then
+                    return
+                end
+
                 enemyLocked = closestEnemy
                 locked = true
 
@@ -173,6 +170,8 @@ local CAS_Actions = {
     ["Roll"] = function(inputState, _inputObject)
         if inputState ~= Enum.UserInputState.Begin then return end
         if (tick() - lastRollTick) < RollDelay then return end 
+        if not Validate:CanRoll(humanoid) then return end
+
         lastRollTick = tick()
 
         Animations.Roll:Play()
@@ -235,7 +234,8 @@ local CAS_Actions = {
                             task.wait()
                         until Validate:CanChangeStance(humanoid) or not UIS:IsKeyDown(Enum.KeyCode.LeftAlt)
                     end
-    
+                    if not UIS:IsKeyDown(Enum.KeyCode.LeftAlt) then break end
+
                     local mouseX, mouseY = mouse.X, mouse.Y
                     local mouseV2 = Vector2.new(mouseX, mouseY)
                     local vectorDiff = mouseV2 - screenCenter
@@ -256,7 +256,6 @@ local CAS_Actions = {
                     local changeStanceDelay = 0
                     if oldStanceName ~= currentStance then
 
-                        stanceCameraPosition[currentStance]()
                         humanoid:SetAttribute("CurrentStance", currentStance)
                         Trigger:FireServer("ChangeStance", humanoid:GetAttribute("CurrentStance"))
                         UIManager:UpdateStanceViewer()
@@ -318,6 +317,6 @@ end
 
 CAS:BindAction("Attack", CAS_Connector, false, table.unpack({Enum.UserInputType.MouseButton1, Enum.UserInputType.Touch}))
 CAS:BindAction("ChangeStance", CAS_Connector, false, Enum.KeyCode.LeftAlt)
-CAS:BindAction("LockOnEnemy", CAS_Connector, false, Enum.KeyCode.L) 
+CAS:BindAction("LockOnEnemy", CAS_Connector, false, Enum.KeyCode.LeftControl) 
 CAS:BindAction("Roll", CAS_Connector, false, Enum.KeyCode.Q) 
 CAS:BindAction("ChangeShoulder", CAS_Connector, false, Enum.KeyCode.T) 

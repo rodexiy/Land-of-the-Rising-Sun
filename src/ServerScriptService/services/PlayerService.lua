@@ -11,9 +11,10 @@ end
 
 function PlayerService:AssemblyCharacter(player: Player)
     local playerData = DataManager:Get(player)
-
+    
     player:LoadCharacter()
     local character = player.Character or player.CharacterAdded:Wait()
+    repeat character.Parent = game.Workspace.Enemies task.wait() until character.Parent == game.Workspace.Enemies
     local humanoid = character:WaitForChild("Humanoid"):: Humanoid
 
     humanoid:SetAttribute("RollDebounce", false)

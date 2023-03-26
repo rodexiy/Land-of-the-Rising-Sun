@@ -1,6 +1,7 @@
 local Katana = {ModuleMain = true}
 local DataManager
 local Validate = require(game.ReplicatedStorage.Common.Validate)
+local RaycastHitbox = require(game.ReplicatedStorage.Shared.RaycastHitbox)
 
 function Katana:WeldSword(player)
     local playerData = DataManager:Get(player)
@@ -11,6 +12,7 @@ function Katana:WeldSword(player)
 
     local swordAndSheath = game.ServerStorage.Swords[playerData.SwordName]:Clone()
     local sword = swordAndSheath.Sword
+    sword.Name = "Sword"
     local sheath = swordAndSheath.Sheath
 
     local swordWeld = Instance.new("WeldConstraint")
@@ -41,6 +43,8 @@ function Katana:Attack(player: Player)
     local character = player.Character or player.CharacterAdded:Wait()
     local humanoid = character:WaitForChild("Humanoid")
     local currentStance = humanoid:GetAttribute("CurrentStance")
+    local CharacterAssets = character:WaitForChild("CharacterAssets")
+    local sword = CharacterAssets.Sword:FindFirstChild("Sword")
 
     if not Validate:CanAttack(humanoid) then return end
     humanoid:SetAttribute("AttackDebounce", true)
@@ -69,6 +73,16 @@ function Katana:Attack(player: Player)
         humanoid.Animator:LoadAnimation(KatanaAnimations["Up"]):Play()
     end
 
+    local hitbox = RaycastHitbox.new(character)
+
+    hitbox.OnHit:Connect(function(hit, hitHumanoid: Humanoid)
+        if hitHumanoid == humanoid then return end
+        hitHumanoid:TakeDamage(35)
+    end)
+    hitbox.Visualizer = true
+    hitbox:HitStart(0.5)
+
+    
 
 end
 
