@@ -1,5 +1,6 @@
 local Trigger = game.ReplicatedStorage.Public.Trigger :: RemoteEvent
 local Player = game.Players.LocalPlayer
+local ParticleService = require(script.Parent.ParticleService)
 
 
 local PlayerGui = Player:WaitForChild("PlayerGui")
@@ -16,6 +17,9 @@ local clientEvents = {
         data.prompt.Enabled = data.visibility or true
     end;
 
+    ["EmitParticle"] = function(data: {["BaseParts"]: BasePart}) 
+        ParticleService:EmitParticle(data)
+    end
 
 }
 

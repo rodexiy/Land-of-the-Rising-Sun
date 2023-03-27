@@ -3,6 +3,7 @@ local DataManager
 local CombatService
 local Validate = require(game.ReplicatedStorage.Common.Validate)
 local RaycastHitbox = require(game.ReplicatedStorage.Shared.RaycastHitbox)
+local Trigger = game.ReplicatedStorage.Common.Trigger :: RemoteEvent
 
 function Katana:WeldSword(player)
     local playerData = DataManager:Get(player)
@@ -49,6 +50,7 @@ function Katana:Attack(player: Player)
 
     if not Validate:CanAttack(humanoid) then return end
     humanoid:SetAttribute("AttackDebounce", true)
+    humanoid:SetAttribute("AttackTime", tick())
     task.delay(AttackDebounces[currentStance], function()
         humanoid:SetAttribute("AttackDebounce", false)
     end)
@@ -78,8 +80,40 @@ function Katana:Attack(player: Player)
     hitbox.OnHit:Connect(function(hit, enemyHumanoid: Humanoid)
         if enemyHumanoid == humanoid then return end
 
+        local enemyCharacter = enemyHumanoid.Parent:: Model
+        local enemyRoot = enemyCharacter:WaitForChild("EnemyHumanoid"):: Part
+
         if CombatService:HaveCounterStance(humanoid, enemyHumanoid) then
-            print("Blocked")
+            if enemyHumanoid:GetAttribute("Attack") then
+                local clashTime = enemyHumanoid:GetAttribute("AttackTime") - humanoid:GetAttribute("AttackTime")             
+                local didClash = {
+                    [true] = function()
+                        CombatService:AddPostureDamage(humanoid, "block", 35 / 2)
+                    end,
+
+                    [false] = function()
+                        --notClash
+                    end
+                }
+
+                didClash[clashTime > 0 and clashTime <= 0.1]()
+            else
+                local deflectTime = enemyHumanoid:GetAttribute("StanceChangeTime") - humanoid:GetAttribute("AttackTime")
+                local didDeflect = {
+                    [true] = function()
+                        Trigger:FireAllClients("EmitParticle", {enemyRoot:FindFirstChild("DeflectParticles")})
+                        CombatService:AddPostureDamage(enemyHumanoid, "Deflect", 35)
+                        CombatService:ApplyDeflectStatus(humanoid)
+                    end,
+    
+                    [false] = function()
+                        Trigger:FireAllClients("EmitParticle", {enemyRoot:FindFirstChild("BlockParticles")})
+                        CombatService:AddPostureDamage(enemyHumanoid, "Block", 35)
+                    end
+                }
+                
+                didDeflect[deflectTime > 0 and deflectTime <= 0.1]()
+            end
         else
             enemyHumanoid:TakeDamage(35)
         end

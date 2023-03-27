@@ -1,6 +1,8 @@
+local Players = game:GetService("Players")
 local CombatService = {ModuleMain = true}
 local Validate = require(game.ReplicatedStorage.Common.Validate)
 local DataManager
+local PlayerService
 
 local WeaponClasses = {}
 
@@ -8,6 +10,30 @@ function GetPlayerWeaponClass(player)
     local playerData = DataManager:Get(player)
     
     return playerData["WeaponClass"]
+end
+
+--Block types can be: block or deflect <- recover a bit of posture damage
+function CombatService:AddPostureDamage(humanoid: Humanoid, blockType: string, damage: number)
+    local blockTypes = {
+        ["Block"] = function()
+            if humanoid:GetAttribute("PostureDamage") + damage
+             >= humanoid:GetAttribute("MaxPostureDamage") then
+                --BlockBreak
+             else
+                humanoid:SetAttribute("PostureDamage", humanoid:GetAttribute("PostureDamage") + (damage / 2))
+             end
+        end;
+
+        ["Deflect"] = function()
+            if (humanoid:GetAttribute("PostureDamage") - (damage / 2)) > 0 then
+                humanoid:SetAttribute("PostureDamage", humanoid:GetAttribute("PostureDamage") - (damage / 3))
+            else
+                humanoid:SetAttribute("PostureDamage", 0)
+            end
+        end,
+    }
+
+    blockTypes[blockType]()
 end
 
 function CombatService:WeldSword(player)
@@ -29,18 +55,17 @@ function CombatService:ChangeStance(player, newStance)
     local humanoid = character:WaitForChild("Humanoid")
 
     if not Validate:CanChangeStance(humanoid) then return end
-
+    humanoid:SetAttribute("StanceChangeTime", tick())
     humanoid:SetAttribute("CurrentStance", newStance)
 end
 
-function CombatService:Main(services)
-    DataManager = services.DataManager
+function CombatService:ApplyDeflectStatus(humanoid: Humanoid)
+    humanoid.WalkSpeed = 0;
+    humanoid:SetAttribute("Deflected", true)
 
-    for i,v in ipairs(script:GetChildren()) do
-        if v:IsA("ModuleScript") then
-            WeaponClasses[v.Name] = require(v)
-        end
-    end
+    task.wait(1)
+
+    humanoid:SetAttribute("Deflected", false)
 end
 
 local counterStances = {
@@ -48,9 +73,20 @@ local counterStances = {
     ["Left"] = "Right";
     ["Up"] = "Up";
 }
-function CombatService:HaveCounterStance(humanoid: Humanoid, enemyHumanoid: Humanoid)
 
+function CombatService:HaveCounterStance(humanoid: Humanoid, enemyHumanoid: Humanoid)
     return counterStances[humanoid:GetAttribute("CurrentStance")] == enemyHumanoid:GetAttribute("CurrentStance")
+end
+
+function CombatService:Main(services)
+    DataManager = services.DataManager
+    PlayerService = services.PlayerService
+
+    for i,v in ipairs(script:GetChildren()) do
+        if v:IsA("ModuleScript") then
+            WeaponClasses[v.Name] = require(v)
+        end
+    end
 end
 
 return CombatService

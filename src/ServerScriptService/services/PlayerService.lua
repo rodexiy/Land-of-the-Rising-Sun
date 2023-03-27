@@ -8,6 +8,15 @@ function PlayerService:AssemblyPlayer(player: Player)
     PlayerService:AssemblyCharacter(player)
 end
 
+function PlayerService:ChangeWalkSpeed(humanoid, newWalkspeed)
+    if humanoid:GetAttribute("Hit") then
+        humanoid.Walkspeed = 0
+      elseif humanoid:SetAttribute("AttackDebounce") then
+         humanoid.Walkspeed = 5
+      else
+         humanoid.Walkspeed = newWalkspeed or humanoid.Walkspeed
+      end
+end
 
 function PlayerService:AssemblyCharacter(player: Player)
     local playerData = DataManager:Get(player)
@@ -22,6 +31,8 @@ function PlayerService:AssemblyCharacter(player: Player)
     humanoid:SetAttribute("WeaponClass", playerData.WeaponClass)
     humanoid:SetAttribute("CurrentStance", "Right")
     humanoid:SetAttribute("AttackVariationNumber", 1)
+    humanoid:SetAttribute("PostureDamage", 0)
+    humanoid:SetAttribute("MaxPostureDamage", 100) 
 
     humanoid.WalkSpeed = 12
 
@@ -37,7 +48,7 @@ function PlayerService:CharacterDied(player: Player, character)
     PlayerService:AssemblyCharacter(player)
 end
 
-function PlayerService:Dash()
+function PlayerService:Roll()
     
 end
 
