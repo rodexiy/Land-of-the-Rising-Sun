@@ -43,4 +43,14 @@ function CombatService:Main(services)
     end
 end
 
+local counterStances = {
+    ["Right"] = "Left";
+    ["Left"] = "Right";
+    ["Up"] = "Up";
+}
+function CombatService:HaveCounterStance(humanoid: Humanoid, enemyHumanoid: Humanoid)
+
+    return counterStances[humanoid:GetAttribute("CurrentStance")] == enemyHumanoid:GetAttribute("CurrentStance")
+end
+
 return CombatService

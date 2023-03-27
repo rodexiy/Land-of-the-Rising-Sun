@@ -1,5 +1,6 @@
 local Katana = {ModuleMain = true}
 local DataManager
+local CombatService
 local Validate = require(game.ReplicatedStorage.Common.Validate)
 local RaycastHitbox = require(game.ReplicatedStorage.Shared.RaycastHitbox)
 
@@ -74,19 +75,22 @@ function Katana:Attack(player: Player)
     end
 
     local hitbox = RaycastHitbox.new(character)
+    hitbox.OnHit:Connect(function(hit, enemyHumanoid: Humanoid)
+        if enemyHumanoid == humanoid then return end
 
-    hitbox.OnHit:Connect(function(hit, hitHumanoid: Humanoid)
-        if hitHumanoid == humanoid then return end
-        hitHumanoid:TakeDamage(35)
+        if CombatService:HaveCounterStance(humanoid, enemyHumanoid) then
+            print("Blocked")
+        else
+            enemyHumanoid:TakeDamage(35)
+        end
     end)
-    hitbox.Visualizer = true
     hitbox:HitStart(0.5)
-
-    
+    hitbox.Visualizer = true
 
 end
 
 function Katana:Main(services)
+    CombatService = services.CombatService
     DataManager = services.DataManager
 end
 
