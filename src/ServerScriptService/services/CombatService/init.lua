@@ -3,6 +3,7 @@ local CombatService = {ModuleMain = true}
 local Validate = require(game.ReplicatedStorage.Common.Validate)
 local DataManager
 local PlayerService
+local Trigger = game.ReplicatedStorage.Public.Trigger :: RemoteEvent
 
 local WeaponClasses = {}
 
@@ -87,6 +88,10 @@ function CombatService:Main(services)
             WeaponClasses[v.Name] = require(v)
         end
     end
+end
+
+function CombatService:EmitParticle(particles: {})
+    Trigger:FireAllClients("EmitParticle", particles)
 end
 
 return CombatService
