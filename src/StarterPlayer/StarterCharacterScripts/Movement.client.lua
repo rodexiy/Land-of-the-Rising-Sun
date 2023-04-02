@@ -103,6 +103,8 @@ local CAS_Actions = {
 
                 enemyLocked = closestEnemy
                 locked = true
+                UIManager:ShowOrHideStanceViewer(true)
+                
 
                 humanoid.AutoRotate = false
 
@@ -134,6 +136,7 @@ local CAS_Actions = {
                 locked = false
                 enemyLocked.LockHighlight:Destroy()
                 enemyLocked = nil
+                UIManager:ShowOrHideStanceViewer(false)
                 
                 camera.CameraType = Enum.CameraType.Custom
 
@@ -225,7 +228,7 @@ local CAS_Actions = {
                 if not UIS:IsKeyDown(Enum.KeyCode.LeftAlt) then return end
 
                 local screenSize = camera.ViewportSize
-                local screenCenter = Vector2.new(screenSize.X / 2, screenSize.Y / 1.6)
+                local screenCenter = Vector2.new(screenSize.X / 2, screenSize.Y / 2)
 
                 fakeCoroutine = true
                 while fakeCoroutine == true do
@@ -233,9 +236,14 @@ local CAS_Actions = {
                         repeat 
                             task.wait()
                         until Validate:CanChangeStance(humanoid) or not UIS:IsKeyDown(Enum.KeyCode.LeftAlt)
-                    end
-                    if not UIS:IsKeyDown(Enum.KeyCode.LeftAlt) then break end
 
+                        if not UIS:IsKeyDown(Enum.KeyCode.LeftAlt) then 
+                            fakeCoroutine = false
+                            return
+                        end
+
+                    end
+                
                     local mouseX, mouseY = mouse.X, mouse.Y
                     local mouseV2 = Vector2.new(mouseX, mouseY)
                     local vectorDiff = mouseV2 - screenCenter
@@ -255,10 +263,9 @@ local CAS_Actions = {
                     
                     local changeStanceDelay = 0
                     if oldStanceName ~= currentStance then
-
                         humanoid:SetAttribute("CurrentStance", currentStance)
                         Trigger:FireServer("ChangeStance", humanoid:GetAttribute("CurrentStance"))
-                        UIManager:UpdateStanceViewer()
+
                     end
                     task.wait()
                 end
@@ -266,6 +273,13 @@ local CAS_Actions = {
             end,    
             [Enum.UserInputState.End] = function()
                 fakeCoroutine = false
+                if locked then 
+                    oldStanceName = currentStance
+                    currentStance = "none"
+                    humanoid:SetAttribute("CurrentStance", "none")
+                    Trigger:FireServer("ChangeStance", humanoid:GetAttribute("CurrentStance"))
+                    return
+                 end
                 UIManager:ShowOrHideStanceViewer(false)
             end
         }

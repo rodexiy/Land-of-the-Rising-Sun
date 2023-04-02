@@ -1,7 +1,7 @@
 local Validate = {}
 
 function Validate:CanAttack(humanoid: Humanoid)
-    if humanoid:GetAttribute("AttackDebounce") or humanoid:GetAttribute("Hit") then 
+    if humanoid:GetAttribute("AttackDebounce") or humanoid:GetAttribute("Hit") or humanoid:GetAttribute("CurrentStance") == "none" then 
         return false
     end
 
