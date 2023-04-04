@@ -50,9 +50,12 @@ function Katana:Attack(player: Player)
 
     if not Validate:CanAttack(humanoid) then return end
     humanoid:SetAttribute("AttackDebounce", true)
+    humanoid:SetAttribute("Attack", true)
     humanoid:SetAttribute("AttackTime", tick())
     task.delay(AttackDebounces[currentStance], function()
         humanoid:SetAttribute("AttackDebounce", false)
+        humanoid:SetAttribute("Attack", true)
+
     end)
 
 

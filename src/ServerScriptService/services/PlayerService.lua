@@ -33,6 +33,7 @@ function PlayerService:AssemblyCharacter(player: Player)
     humanoid:SetAttribute("AttackVariationNumber", 1)
     humanoid:SetAttribute("PostureDamage", 0)
     humanoid:SetAttribute("MaxPostureDamage", 100) 
+    humanoid:SetAttribute("Attack", false   )
 
     humanoid.WalkSpeed = 12
 
